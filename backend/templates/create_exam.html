@@ -1,0 +1,153 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Exam - eVidyaHub{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-container {
+        max-width: 700px;
+        margin: 0 auto;
+    }
+
+    .form-title {
+        text-align: center;
+        font-size: 2.5rem;
+        color: #4a9eff;
+        margin-bottom: 0.5rem;
+    }
+
+    .form-subtitle {
+        text-align: center;
+        color: #888;
+        margin-bottom: 2rem;
+    }
+
+    .form-card {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 15px;
+        padding: 3rem;
+        border: 1px solid rgba(74, 158, 255, 0.1);
+    }
+
+    .form-group {
+        margin-bottom: 2rem;
+    }
+
+    .form-label {
+        display: block;
+        color: #e0e0e0;
+        font-size: 1.1rem;
+        margin-bottom: 0.75rem;
+        font-weight: 500;
+    }
+
+    .form-label .required {
+        color: #ff4757;
+    }
+
+    .form-input, .form-textarea {
+        width: 100%;
+        padding: 1rem;
+        border: 2px solid rgba(74, 158, 255, 0.3);
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.05);
+        color: #e0e0e0;
+        font-size: 1rem;
+        transition: all 0.3s;
+    }
+
+    .form-input:focus, .form-textarea:focus {
+        outline: none;
+        border-color: #4a9eff;
+        background: rgba(255, 255, 255, 0.08);
+        box-shadow: 0 0 0 3px rgba(74, 158, 255, 0.1);
+    }
+
+    .form-textarea {
+        resize: vertical;
+        min-height: 120px;
+        font-family: inherit;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        margin-top: 2rem;
+    }
+
+    .btn-large {
+        padding: 1rem 2.5rem;
+        font-size: 1.1rem;
+    }
+
+    .form-help {
+        color: #888;
+        font-size: 0.9rem;
+        margin-top: 0.5rem;
+    }
+
+    @media (max-width: 768px) {
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+
+        .form-actions {
+            flex-direction: column;
+        }
+
+        .btn-large {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <h1 class="form-title">Create New Exam</h1>
+    <p class="form-subtitle">Fill in the details to create a new exam</p>
+    
+    <div class="form-card">
+        <form method="POST">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label class="form-label">Exam Title <span class="required">*</span></label>
+                <input type="text" name="title" class="form-input" placeholder="e.g., Mathematics Mid-Term Exam" required>
+                <p class="form-help">Give your exam a clear and descriptive title</p>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Description <span class="required">*</span></label>
+                <textarea name="description" class="form-textarea" placeholder="Describe the exam topics, instructions, and any special notes for students..." required></textarea>
+                <p class="form-help">Provide detailed information about the exam</p>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Duration (minutes) <span class="required">*</span></label>
+                    <input type="number" name="duration" class="form-input" placeholder="e.g., 60" min="1" max="300" required>
+                    <p class="form-help">How long students have to complete the exam</p>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Total Marks <span class="required">*</span></label>
+                    <input type="number" name="total_marks" class="form-input" placeholder="e.g., 100" min="1" required>
+                    <p class="form-help">Maximum marks for this exam</p>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <a href="{% url 'teacher_dashboard' %}" class="btn btn-danger btn-large">Cancel</a>
+                <button type="submit" class="btn btn-success btn-large">Create Exam</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

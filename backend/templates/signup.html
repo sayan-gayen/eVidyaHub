@@ -1,0 +1,172 @@
+
+<style>
+    .auth-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        padding: 2rem 0;
+    }
+
+    .auth-card {
+        background: rgba(15, 20, 25, 0.8);
+        border-radius: 20px;
+        padding: 3rem;
+        width: 100%;
+        max-width: 500px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(15px);
+        border: 1px solid rgba(74, 158, 255, 0.1);
+    }
+
+    .auth-title {
+        text-align: center;
+        color: #4a9eff;
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .auth-subtitle {
+        text-align: center;
+        color: #888;
+        margin-bottom: 2rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: #e0e0e0;
+        font-weight: 500;
+    }
+
+    .form-input, .form-select {
+        width: 100%;
+        padding: 0.875rem;
+        border: 2px solid rgba(74, 158, 255, 0.3);
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.05);
+        color: #e0e0e0;
+        font-size: 1rem;
+        transition: all 0.3s;
+    }
+
+    .form-input:focus, .form-select:focus {
+        outline: none;
+        border-color: #4a9eff;
+        background: rgba(255, 255, 255, 0.08);
+        box-shadow: 0 0 0 3px rgba(74, 158, 255, 0.1);
+    }
+
+    .form-select option {
+        background: #1a1a2e;
+        color: #e0e0e0;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+
+    .btn-auth {
+        width: 100%;
+        padding: 1rem;
+        background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        margin-top: 1rem;
+    }
+
+    .btn-auth:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(46, 204, 113, 0.4);
+    }
+
+    .auth-link {
+        text-align: center;
+        margin-top: 1.5rem;
+        color: #888;
+    }
+
+    .auth-link a {
+        color: #4a9eff;
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    .auth-link a:hover {
+        text-decoration: underline;
+    }
+</style>
+
+<div class="auth-container">
+    <div class="auth-card">
+        <h1 class="auth-title">Join eVidyaHub</h1>
+        <p class="auth-subtitle">Create your account</p>
+
+        <form method="POST">
+            {% csrf_token %}
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">First Name *</label>
+                    <input type="text" name="first_name" class="form-input" placeholder="First Name" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Last Name *</label>
+                    <input type="text" name="last_name" class="form-input" placeholder="Last Name" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Username *</label>
+                <input type="text" name="username" class="form-input" placeholder="Choose a username" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Email *</label>
+                <input type="email" name="email" class="form-input" placeholder="your.email@example.com" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Phone Number</label>
+                <input type="tel" name="phone" class="form-input" placeholder="Enter phone number">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">I am a *</label>
+                <select name="user_type" class="form-select" required>
+                    <option value="">Select User Type</option>
+                    <option value="student">Student</option>
+                    <option value="teacher">Teacher</option>
+                </select>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Password *</label>
+                    <input type="password" name="password" class="form-input" placeholder="Create password" required minlength="6">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Confirm Password *</label>
+                    <input type="password" name="confirm_password" class="form-input" placeholder="Confirm password" required>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-auth">Sign Up</button>
+        </form>
+
+        <div class="auth-link">
+            Already have an account? <a href="{% url 'login' %}">Login</a>
+        </div>
+    </div>
+</div>
+

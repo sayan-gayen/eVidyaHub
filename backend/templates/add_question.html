@@ -1,0 +1,269 @@
+{% extends 'base.html' %}
+
+{% block title %}Add Questions - {{ exam.title }} - eVidyaHub{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-header {
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+
+    .page-title {
+        font-size: 2.5rem;
+        color: #4a9eff;
+        margin-bottom: 0.5rem;
+    }
+
+    .page-subtitle {
+        color: #888;
+        font-size: 1.2rem;
+    }
+
+    .content-grid {
+        display: grid;
+        grid-template-columns: 1fr 400px;
+        gap: 2rem;
+    }
+
+    .form-section {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 15px;
+        padding: 2rem;
+        border: 1px solid rgba(74, 158, 255, 0.1);
+    }
+
+    .section-title {
+        color: #4a9eff;
+        margin-bottom: 1.5rem;
+        font-size: 1.5rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        display: block;
+        color: #e0e0e0;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+    }
+
+    .form-input, .form-textarea, .form-select {
+        width: 100%;
+        padding: 0.875rem;
+        border: 2px solid rgba(74, 158, 255, 0.3);
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.05);
+        color: #e0e0e0;
+        font-size: 1rem;
+        transition: all 0.3s;
+    }
+
+    .form-input:focus, .form-textarea:focus, .form-select:focus {
+        outline: none;
+        border-color: #4a9eff;
+        background: rgba(255, 255, 255, 0.08);
+        box-shadow: 0 0 0 3px rgba(74, 158, 255, 0.1);
+    }
+
+    .form-textarea {
+        resize: vertical;
+        min-height: 100px;
+        font-family: inherit;
+    }
+
+    .form-select option {
+        background: #1a1a2e;
+        color: #e0e0e0;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+
+    .questions-list {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 15px;
+        padding: 2rem;
+        max-height: 800px;
+        overflow-y: auto;
+        border: 1px solid rgba(74, 158, 255, 0.1);
+    }
+
+    .list-title {
+        font-size: 1.5rem;
+        color: #4a9eff;
+        margin-bottom: 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .question-count {
+        background: rgba(74, 158, 255, 0.2);
+        color: #4a9eff;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        font-size: 1rem;
+    }
+
+    .question-item {
+        background: rgba(255, 255, 255, 0.03);
+        border-radius: 10px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        border-left: 3px solid #4a9eff;
+    }
+
+    .question-text {
+        color: #e0e0e0;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+    }
+
+    .question-meta {
+        color: #888;
+        font-size: 0.85rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .correct-answer {
+        color: #2ecc71;
+        font-weight: 600;
+    }
+
+    .empty-state {
+        text-align: center;
+        color: #888;
+        padding: 3rem 1rem;
+    }
+
+    @media (max-width: 1024px) {
+        .content-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .questions-list {
+            max-height: 400px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Add Questions</h1>
+    <p class="page-subtitle">{{ exam.title }}</p>
+</div>
+
+<div class="content-grid">
+    <div class="form-section">
+        <h2 class="section-title">Question Form</h2>
+        
+        <form method="POST">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label class="form-label">Question Type</label>
+                <select name="question_type" class="form-select" id="question-type">
+                    <option value="mcq">Multiple Choice (4 options)</option>
+                    <option value="true_false">True/False (2 options)</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Question Text *</label>
+                <textarea name="question_text" class="form-textarea" placeholder="Enter your question here..." required></textarea>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Option A *</label>
+                <input type="text" name="option_a" class="form-input" placeholder="Enter option A" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Option B *</label>
+                <input type="text" name="option_b" class="form-input" placeholder="Enter option B" required>
+            </div>
+
+            <div class="form-group" id="option-c-group">
+                <label class="form-label">Option C</label>
+                <input type="text" name="option_c" class="form-input" placeholder="Enter option C">
+            </div>
+
+            <div class="form-group" id="option-d-group">
+                <label class="form-label">Option D</label>
+                <input type="text" name="option_d" class="form-input" placeholder="Enter option D">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Correct Answer *</label>
+                <select name="correct_answer" class="form-select" id="correct-answer" required>
+                    <option value="A">A</option>
+                    <option value="B">B</option>
+                    <option value="C">C</option>
+                    <option value="D">D</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Marks *</label>
+                <input type="number" name="marks" class="form-input" value="1" min="1" required>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" name="add_another" class="btn btn-primary" style="flex: 1;">Add & Continue</button>
+                <button type="submit" class="btn btn-success">Finish</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="questions-list">
+        <div class="list-title">
+            <span>Questions</span>
+            <span class="question-count">{{ questions.count }}</span>
+        </div>
+        
+        {% if questions %}
+            {% for question in questions %}
+            <div class="question-item">
+                <div class="question-text">Q{{ forloop.counter }}: {{ question.question_text|truncatewords:15 }}</div>
+                <div class="question-meta">
+                    <span>Correct: <span class="correct-answer">{{ question.correct_answer }}</span> | Marks: {{ question.marks }}</span>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">
+                <p>📝 No questions added yet</p>
+                <p style="font-size: 0.9rem; margin-top: 0.5rem;">Start adding questions using the form</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    const questionType = document.getElementById('question-type');
+    const optionCGroup = document.getElementById('option-c-group');
+    const optionDGroup = document.getElementById('option-d-group');
+    const correctAnswer = document.getElementById('correct-answer');
+
+    questionType.addEventListener('change', function() {
+        if (this.value === 'true_false') {
+            optionCGroup.style.display = 'none';
+            optionDGroup.style.display = 'none';
+            correctAnswer.innerHTML = '<option value="A">A (True)</option><option value="B">B (False)</option>';
+        } else {
+            optionCGroup.style.display = 'block';
+            optionDGroup.style.display = 'block';
+            correctAnswer.innerHTML = '<option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option>';
+        }
+    });
+</script>
+{% endblock %}

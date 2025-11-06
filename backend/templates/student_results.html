@@ -1,0 +1,181 @@
+{% extends 'base.html' %}
+
+{% block title %}My Results - eVidyaHub{% endblock %}
+
+{% block extra_css %}
+<style>
+    .results-header {
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+
+    .results-title {
+        font-size: 2.5rem;
+        color: #4a9eff;
+        margin-bottom: 1rem;
+    }
+
+    .results-subtitle {
+        color: #888;
+        font-size: 1.1rem;
+    }
+
+    .result-card {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 15px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        border-left: 5px solid #4a9eff;
+        transition: all 0.3s;
+    }
+
+    .result-card:hover {
+        transform: translateX(5px);
+        box-shadow: 0 8px 25px rgba(74, 158, 255, 0.2);
+        background: rgba(255, 255, 255, 0.08);
+    }
+
+    .result-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .result-exam-title {
+        font-size: 1.5rem;
+        color: #e0e0e0;
+    }
+
+    .result-score {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #4a9eff;
+    }
+
+    .result-details {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        padding-top: 1rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .result-detail {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .detail-label {
+        color: #888;
+        font-size: 0.9rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .detail-value {
+        color: #e0e0e0;
+        font-size: 1.1rem;
+        font-weight: 600;
+    }
+
+    .no-results {
+        text-align: center;
+        padding: 4rem;
+        color: #888;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 15px;
+    }
+
+    .performance-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+
+    .badge-excellent {
+        background: rgba(46, 204, 113, 0.2);
+        color: #2ecc71;
+    }
+
+    .badge-good {
+        background: rgba(52, 152, 219, 0.2);
+        color: #3498db;
+    }
+
+    .badge-average {
+        background: rgba(255, 165, 0, 0.2);
+        color: #ffa500;
+    }
+
+    .badge-poor {
+        background: rgba(255, 71, 87, 0.2);
+        color: #ff4757;
+    }
+
+    @media (max-width: 768px) {
+        .result-header {
+            flex-direction: column;
+            text-align: center;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="results-header">
+    <h1 class="results-title">My Exam Results</h1>
+    <p class="results-subtitle">View all your completed exams and scores</p>
+</div>
+
+{% if attempts %}
+    {% for attempt in attempts %}
+    {% with percentage=attempt.get_percentage %}
+    <div class="result-card">
+        <div class="result-header">
+            <h2 class="result-exam-title">{{ attempt.exam.title }}</h2>
+            <div class="result-score">{{ attempt.score }}/{{ attempt.exam.total_marks }}</div>
+        </div>
+
+        <div class="result-details">
+            <div class="result-detail">
+                <span class="detail-label">📅 Completed On</span>
+                <span class="detail-value">{{ attempt.completed_at|date:"M d, Y" }}</span>
+            </div>
+            <div class="result-detail">
+                <span class="detail-label">⏰ Time</span>
+                <span class="detail-value">{{ attempt.completed_at|date:"g:i A" }}</span>
+            </div>
+            <div class="result-detail">
+                <span class="detail-label">📊 Percentage</span>
+                <span class="detail-value">{{ percentage }}%</span>
+            </div>
+            <div class="result-detail">
+                <span class="detail-label">⭐ Performance</span>
+                <span class="performance-badge 
+                    {% if percentage >= 85 %}badge-excellent
+                    {% elif percentage >= 70 %}badge-good
+                    {% elif percentage >= 50 %}badge-average
+                    {% else %}badge-poor
+                    {% endif %}">
+                    {% if percentage >= 85 %}Excellent
+                    {% elif percentage >= 70 %}Good
+                    {% elif percentage >= 50 %}Average
+                    {% else %}Needs Improvement
+                    {% endif %}
+                </span>
+            </div>
+        </div>
+    </div>
+    {% endwith %}
+    {% endfor %}
+{% else %}
+    <div class="no-results">
+        <p style="font-size: 1.2rem; margin-bottom: 1rem;">📚 You haven't completed any exams yet.</p>
+        <p style="margin-bottom: 2rem;">Start taking exams to see your results here!</p>
+        <a href="{% url 'student_dashboard' %}" class="btn btn-primary">Browse Exams</a>
+    </div>
+{% endif %}
+{% endblock %}

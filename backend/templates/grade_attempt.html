@@ -1,0 +1,233 @@
+{% extends 'base.html' %}
+
+{% block title %}Grade Attempt - eVidyaHub{% endblock %}
+
+{% block extra_css %}
+<style>
+    .attempt-header {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 15px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        border: 1px solid rgba(74, 158, 255, 0.1);
+    }
+
+    .header-grid {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 2rem;
+        align-items: center;
+    }
+
+    .header-info h1 {
+        font-size: 2rem;
+        color: #4a9eff;
+        margin-bottom: 0.5rem;
+    }
+
+    .header-info p {
+        color: #888;
+        margin-bottom: 0.25rem;
+    }
+
+    .score-card {
+        text-align: center;
+        padding: 1.5rem 2rem;
+        background: rgba(74, 158, 255, 0.1);
+        border-radius: 15px;
+        border: 2px solid #4a9eff;
+        min-width: 180px;
+    }
+
+    .score-value {
+        font-size: 2.5rem;
+        color: #4a9eff;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+    }
+
+    .score-percentage {
+        font-size: 1.2rem;
+        color: #888;
+    }
+
+    .answers-section {
+        margin-top: 2rem;
+    }
+
+    .section-title {
+        font-size: 1.8rem;
+        color: #4a9eff;
+        margin-bottom: 2rem;
+    }
+
+    .answer-card {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 15px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        border-left: 4px solid;
+    }
+
+    .answer-card.correct {
+        border-left-color: #2ecc71;
+    }
+
+    .answer-card.incorrect {
+        border-left-color: #ff4757;
+    }
+
+    .answer-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .question-number {
+        font-size: 1.2rem;
+        color: #4a9eff;
+        font-weight: 600;
+    }
+
+    .answer-status {
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    .status-correct {
+        background: rgba(46, 204, 113, 0.2);
+        color: #2ecc71;
+    }
+
+    .status-incorrect {
+        background: rgba(255, 71, 87, 0.2);
+        color: #ff4757;
+    }
+
+    .question-text {
+        color: #e0e0e0;
+        font-size: 1.15rem;
+        margin-bottom: 1.5rem;
+        line-height: 1.6;
+    }
+
+    .answer-options {
+        display: grid;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .option {
+        padding: 1rem;
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.03);
+        color: #b0b0b0;
+    }
+
+    .option.selected {
+        background: rgba(74, 158, 255, 0.1);
+        border: 2px solid #4a9eff;
+        color: #4a9eff;
+    }
+
+    .option.correct-answer {
+        background: rgba(46, 204, 113, 0.1);
+        border: 2px solid #2ecc71;
+        color: #2ecc71;
+    }
+
+    .option.wrong-answer {
+        background: rgba(255, 71, 87, 0.1);
+        border: 2px solid #ff4757;
+        color: #ff4757;
+    }
+
+    .answer-explanation {
+        margin-top: 1rem;
+        padding: 1rem;
+        background: rgba(255, 255, 255, 0.03);
+        border-radius: 8px;
+        color: #888;
+        font-size: 0.95rem;
+    }
+
+    .back-button {
+        text-align: center;
+        margin-top: 3rem;
+    }
+
+    @media (max-width: 768px) {
+        .header-grid {
+            grid-template-columns: 1fr;
+            text-align: center;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="attempt-header">
+    <div class="header-grid">
+        <div class="header-info">
+            <h1>{{ attempt.exam.title }}</h1>
+            <p><strong>Student:</strong> {{ attempt.student.get_full_name }} ({{ attempt.student.username }})</p>
+            <p><strong>Completed:</strong> {{ attempt.completed_at|date:"F d, Y" }} at {{ attempt.completed_at|date:"g:i A" }}</p>
+            <p><strong>Total Questions:</strong> {{ answers.count }}</p>
+        </div>
+
+        <div class="score-card">
+            <div class="score-value">{{ attempt.score }}/{{ attempt.exam.total_marks }}</div>
+            <div class="score-percentage">{{ attempt.get_percentage }}%</div>
+        </div>
+    </div>
+</div>
+
+        <div class="answer-options">
+            <div class="option {% if answer.selected_answer == 'A' %}{% if answer.is_correct %}correct-answer{% else %}wrong-answer{% endif %}{% elif answer.question.correct_answer == 'A' %}correct-answer{% endif %}">
+                <strong>A)</strong> {{ answer.question.option_a }}
+                {% if answer.selected_answer == 'A' %}<span style="float: right;">← Selected</span>{% endif %}
+            </div>
+
+            <div class="option {% if answer.selected_answer == 'B' %}{% if answer.is_correct %}correct-answer{% else %}wrong-answer{% endif %}{% elif answer.question.correct_answer == 'B' %}correct-answer{% endif %}">
+                <strong>B)</strong> {{ answer.question.option_b }}
+                {% if answer.selected_answer == 'B' %}<span style="float: right;">← Selected</span>{% endif %}
+            </div>
+
+            {% if answer.question.option_c %}
+            <div class="option {% if answer.selected_answer == 'C' %}{% if answer.is_correct %}correct-answer{% else %}wrong-answer{% endif %}{% elif answer.question.correct_answer == 'C' %}correct-answer{% endif %}">
+                <strong>C)</strong> {{ answer.question.option_c }}
+                {% if answer.selected_answer == 'C' %}<span style="float: right;">← Selected</span>{% endif %}
+            </div>
+            {% endif %}
+
+            {% if answer.question.option_d %}
+            <div class="option {% if answer.selected_answer == 'D' %}{% if answer.is_correct %}correct-answer{% else %}wrong-answer{% endif %}{% elif answer.question.correct_answer == 'D' %}correct-answer{% endif %}">
+                <strong>D)</strong> {{ answer.question.option_d }}
+                {% if answer.selected_answer == 'D' %}<span style="float: right;">← Selected</span>{% endif %}
+            </div>
+            {% endif %}
+        <div class="answer-header">
+        {% if answer.question.question_type == 'mcq' and answer.question.marks %}
+        <div class="answer-explanation">
+            <strong>Marks:</strong> {{ answer.question.marks }}
+        </div>
+        {% endif %}
+                {% if answer.is_correct %}
+                    ✓ Correct (+{{ answer.question.marks }} mark{{ answer.question.marks|pluralize }})
+                {% else %}
+                    ✗ Incorrect
+                {% endif %}
+            </span>
+        </div>
+
+        <div class="question-text">{{ answer.question.question_text }}</div>
+
+        <div class="answer-options">
+            <div class="option {% if answer.selected_answer == 'A' %}{% if answer.is_correct %}correct-answer{% else %}wrong-answer{% endif %}{% elif answer.question.correct_answer == 'A' %}correct-answer{% endif %}">
+                <strong>A)</strong> {{ answer.question.option_a }}
+                {% if answer.selected_answer == 'A' %}<span style="float: right;">←

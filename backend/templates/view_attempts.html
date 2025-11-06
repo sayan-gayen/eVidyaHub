@@ -1,0 +1,194 @@
+{% extends 'base.html' %}
+
+{% block title %}All Exam Attempts - eVidyaHub{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-header {
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+
+    .page-title {
+        font-size: 2.5rem;
+        color: #4a9eff;
+        margin-bottom: 0.5rem;
+    }
+
+    .page-subtitle {
+        color: #888;
+        font-size: 1.1rem;
+    }
+
+    .attempts-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .attempt-card {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 15px;
+        padding: 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: all 0.3s;
+        gap: 2rem;
+        flex-wrap: wrap;
+        border: 2px solid transparent;
+    }
+
+    .attempt-card:hover {
+        border-color: #4a9eff;
+        background: rgba(255, 255, 255, 0.08);
+        transform: translateY(-3px);
+    }
+
+    .attempt-info {
+        flex: 1;
+        min-width: 300px;
+    }
+
+    .student-name {
+        font-size: 1.3rem;
+        color: #e0e0e0;
+        margin-bottom: 0.5rem;
+    }
+
+    .exam-title {
+        color: #4a9eff;
+        font-size: 1.1rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .attempt-meta {
+        color: #888;
+        font-size: 0.9rem;
+        display: flex;
+        gap: 1.5rem;
+        flex-wrap: wrap;
+    }
+
+    .score-section {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+    }
+
+    .score-box {
+        text-align: center;
+        padding: 1rem 1.5rem;
+        background: rgba(74, 158, 255, 0.1);
+        border-radius: 10px;
+        border: 2px solid #4a9eff;
+    }
+
+    .score-value {
+        font-size: 1.8rem;
+        color: #4a9eff;
+        font-weight: bold;
+    }
+
+    .score-label {
+        color: #888;
+        font-size: 0.85rem;
+        margin-top: 0.25rem;
+    }
+
+    .percentage-badge {
+        padding: 0.75rem 1.25rem;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 1.1rem;
+    }
+
+    .percentage-high {
+        background: rgba(46, 204, 113, 0.2);
+        color: #2ecc71;
+    }
+
+    .percentage-medium {
+        background: rgba(255, 165, 0, 0.2);
+        color: #ffa500;
+    }
+
+    .percentage-low {
+        background: rgba(255, 71, 87, 0.2);
+        color: #ff4757;
+    }
+
+    .no-attempts {
+        text-align: center;
+        padding: 4rem;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 15px;
+        color: #888;
+    }
+
+    @media (max-width: 768px) {
+        .attempt-card {
+            flex-direction: column;
+        }
+
+        .score-section {
+            flex-direction: column;
+            width: 100%;
+        }
+
+        .score-box {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">All Exam Attempts</h1>
+    <p class="page-subtitle">Review student performance across all exams</p>
+</div>
+
+{% if attempts %}
+<div class="attempts-list">
+    {% for attempt in attempts %}
+    {% with percentage=attempt.get_percentage %}
+    <div class="attempt-card">
+        <div class="attempt-info">
+            <div class="student-name">👤 {{ attempt.student.get_full_name }}</div>
+            <div class="exam-title">📝 {{ attempt.exam.title }}</div>
+            <div class="attempt-meta">
+                <span>Username: {{ attempt.student.username }}</span>
+                <span>📅 {{ attempt.completed_at|date:"M d, Y" }}</span>
+                <span>⏰ {{ attempt.completed_at|date:"g:i A" }}</span>
+            </div>
+        </div>
+
+        <div class="score-section">
+            <div class="score-box">
+                <div class="score-value">{{ attempt.score }}/{{ attempt.exam.total_marks }}</div>
+                <div class="score-label">Score</div>
+            </div>
+            
+            <div class="percentage-badge 
+                {% if percentage >= 75 %}percentage-high
+                {% elif percentage >= 50 %}percentage-medium
+                {% else %}percentage-low
+                {% endif %}">
+                {{ percentage }}%
+            </div>
+
+            <a href="{% url 'grade_attempt' attempt.id %}" class="btn btn-primary">View Details</a>
+        </div>
+    </div>
+    {% endwith %}
+    {% endfor %}
+</div>
+{% else %}
+<div class="no-attempts">
+    <p style="font-size: 1.2rem; margin-bottom: 1rem;">📊 No exam attempts yet</p>
+    <p style="margin-bottom: 2rem;">Students haven't taken any exams yet</p>
+    <a href="{% url 'teacher_dashboard' %}" class="btn btn-primary">Back to Dashboard</a>
+</div>
+{% endif %}
+{% endblock %}

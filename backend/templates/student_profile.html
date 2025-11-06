@@ -1,0 +1,226 @@
+{% extends 'base.html' %}
+
+{% block title %}My Profile - eVidyaHub{% endblock %}
+
+{% block extra_css %}
+<style>
+    .profile-container {
+        max-width: 1000px;
+        margin: 0 auto;
+    }
+
+    .profile-header {
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+
+    .profile-title {
+        font-size: 2.5rem;
+        color: #4a9eff;
+        margin-bottom: 1rem;
+    }
+
+    .profile-subtitle {
+        color: #888;
+        font-size: 1.1rem;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 2rem;
+        margin-bottom: 3rem;
+    }
+
+    .stat-card {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 15px;
+        padding: 2rem;
+        text-align: center;
+        border: 2px solid transparent;
+        transition: all 0.3s;
+    }
+
+    .stat-card:hover {
+        border-color: #4a9eff;
+        transform: translateY(-5px);
+    }
+
+    .stat-value {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: #4a9eff;
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+        color: #b0b0b0;
+        font-size: 1rem;
+    }
+
+    .growth-section {
+        margin-top: 3rem;
+    }
+
+    .section-title {
+        font-size: 2rem;
+        color: #4a9eff;
+        margin-bottom: 2rem;
+    }
+
+    .attempt-card {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: all 0.3s;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .attempt-card:hover {
+        background: rgba(255, 255, 255, 0.08);
+    }
+
+    .attempt-info h3 {
+        color: #e0e0e0;
+        margin-bottom: 0.5rem;
+    }
+
+    .attempt-date {
+        color: #888;
+        font-size: 0.9rem;
+    }
+
+    .attempt-score-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .attempt-score {
+        text-align: center;
+        padding: 1rem 2rem;
+        background: rgba(74, 158, 255, 0.1);
+        border-radius: 10px;
+        border: 2px solid #4a9eff;
+    }
+
+    .score-value {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #4a9eff;
+    }
+
+    .score-label {
+        color: #b0b0b0;
+        font-size: 0.9rem;
+        margin-top: 0.25rem;
+    }
+
+    .percentage-badge {
+        padding: 0.75rem 1rem;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 1.1rem;
+    }
+
+    .percentage-high {
+        background: rgba(46, 204, 113, 0.2);
+        color: #2ecc71;
+    }
+
+    .percentage-medium {
+        background: rgba(255, 165, 0, 0.2);
+        color: #ffa500;
+    }
+
+    .percentage-low {
+        background: rgba(255, 71, 87, 0.2);
+        color: #ff4757;
+    }
+
+    .no-attempts {
+        text-align: center;
+        padding: 3rem;
+        color: #888;
+    }
+
+    @media (max-width: 768px) {
+        .attempt-card {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .attempt-score-wrapper {
+            flex-direction: column;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+    <div class="profile-header">
+        <h1 class="profile-title">{{ user.get_full_name }}'s Profile</h1>
+        <p class="profile-subtitle">Track your academic progress and growth</p>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-value">{{ total_exams }}</div>
+            <div class="stat-label">Exams Taken</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ total_score }}</div>
+            <div class="stat-label">Total Score</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ total_possible }}</div>
+            <div class="stat-label">Total Possible</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ average_percentage }}%</div>
+            <div class="stat-label">Average Score</div>
+        </div>
+    </div>
+
+    <div class="growth-section">
+        <h2 class="section-title">Exam History & Growth</h2>
+        
+        {% if attempts %}
+            {% for attempt in attempts %}
+            {% with percentage=attempt.get_percentage %}
+            <div class="attempt-card">
+                <div class="attempt-info">
+                    <h3>{{ attempt.exam.title }}</h3>
+                    <p class="attempt-date">📅 Completed on {{ attempt.completed_at|date:"F d, Y" }} at {{ attempt.completed_at|date:"g:i A" }}</p>
+                </div>
+                <div class="attempt-score-wrapper">
+                    <div class="attempt-score">
+                        <div class="score-value">{{ attempt.score }}/{{ attempt.exam.total_marks }}</div>
+                        <div class="score-label">Score</div>
+                    </div>
+                    <span class="percentage-badge 
+                        {% if percentage >= 75 %}percentage-high
+                        {% elif percentage >= 50 %}percentage-medium
+                        {% else %}percentage-low
+                        {% endif %}">
+                        {{ percentage }}%
+                    </span>
+                </div>
+            </div>
+            {% endwith %}
+            {% endfor %}
+        {% else %}
+            <div class="no-attempts">
+                <p style="font-size: 1.1rem;">📚 No exam attempts yet. Start taking exams to track your progress!</p>
+                <a href="{% url 'student_dashboard' %}" class="btn btn-primary" style="margin-top: 1rem;">Browse Exams</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

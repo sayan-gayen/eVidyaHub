@@ -1,0 +1,153 @@
+{% extends 'base.html' %}
+
+{% block title %}Student Dashboard - eVidyaHub{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dashboard-header {
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+
+    .dashboard-title {
+        font-size: 2.5rem;
+        color: #4a9eff;
+        margin-bottom: 0.5rem;
+    }
+
+    .dashboard-subtitle {
+        color: #888;
+        font-size: 1.2rem;
+    }
+
+    .exams-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 2rem;
+    }
+
+    .exam-card {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 15px;
+        padding: 2rem;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        transition: all 0.3s;
+        border: 2px solid transparent;
+    }
+
+    .exam-card:hover {
+        transform: translateY(-5px);
+        border-color: #4a9eff;
+        box-shadow: 0 8px 25px rgba(74, 158, 255, 0.3);
+    }
+
+    .exam-title {
+        font-size: 1.5rem;
+        color: #4a9eff;
+        margin-bottom: 1rem;
+    }
+
+    .exam-description {
+        color: #b0b0b0;
+        margin-bottom: 1.5rem;
+        line-height: 1.6;
+    }
+
+    .exam-details {
+        display: flex;
+        gap: 2rem;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+    }
+
+    .exam-detail-item {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .detail-label {
+        color: #888;
+        font-size: 0.85rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .detail-value {
+        color: #e0e0e0;
+        font-weight: 600;
+        font-size: 1.1rem;
+    }
+
+    .exam-actions {
+        display: flex;
+        gap: 1rem;
+    }
+
+    .attempted-badge {
+        background: rgba(46, 204, 113, 0.2);
+        color: #2ecc71;
+        padding: 0.75rem 1rem;
+        border-radius: 8px;
+        text-align: center;
+        font-weight: 600;
+        flex: 1;
+    }
+
+    .no-exams {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: #888;
+        font-size: 1.2rem;
+    }
+
+    @media (max-width: 768px) {
+        .exams-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <h1 class="dashboard-title">Welcome, {{ user.first_name }}!</h1>
+    <p class="dashboard-subtitle">Select an exam to begin your test</p>
+</div>
+
+{% if exams %}
+<div class="exams-grid">
+    {% for exam in exams %}
+    <div class="exam-card">
+        <h3 class="exam-title">{{ exam.title }}</h3>
+        <p class="exam-description">{{ exam.description|truncatewords:20 }}</p>
+        
+        <div class="exam-details">
+            <div class="exam-detail-item">
+                <span class="detail-label">Duration</span>
+                <span class="detail-value">{{ exam.duration }} mins</span>
+            </div>
+            <div class="exam-detail-item">
+                <span class="detail-label">Total Marks</span>
+                <span class="detail-value">{{ exam.total_marks }}</span>
+            </div>
+            <div class="exam-detail-item">
+                <span class="detail-label">Questions</span>
+                <span class="detail-value">{{ exam.questions.count }}</span>
+            </div>
+        </div>
+
+        <div class="exam-actions">
+            {% if exam.id in attempted_exam_ids %}
+                <div class="attempted-badge">✓ Already Attempted</div>
+            {% else %}
+                <a href="{% url 'take_exam' exam.id %}" class="btn btn-primary" style="flex: 1; text-align: center;">Take Exam</a>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="no-exams">
+    <p>📚 No exams available at the moment. Check back later!</p>
+</div>
+{% endif %}
+{% endblock %}

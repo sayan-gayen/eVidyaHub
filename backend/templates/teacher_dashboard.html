@@ -1,0 +1,206 @@
+{% extends 'base.html' %}
+
+{% block title %}Teacher Dashboard - eVidyaHub{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dashboard-header {
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+
+    .dashboard-title {
+        font-size: 2.5rem;
+        color: #4a9eff;
+        margin-bottom: 1rem;
+    }
+
+    .dashboard-subtitle {
+        color: #888;
+        font-size: 1.2rem;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 2rem;
+        margin-bottom: 3rem;
+    }
+
+    .stat-card {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 15px;
+        padding: 2rem;
+        text-align: center;
+        border: 2px solid transparent;
+        transition: all 0.3s;
+    }
+
+    .stat-card:hover {
+        border-color: #4a9eff;
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(74, 158, 255, 0.2);
+    }
+
+    .stat-value {
+        font-size: 3rem;
+        font-weight: bold;
+        color: #4a9eff;
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+        color: #b0b0b0;
+        font-size: 1.1rem;
+    }
+
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .section-title {
+        font-size: 2rem;
+        color: #4a9eff;
+    }
+
+    .exam-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .exam-item {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 12px;
+        padding: 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: all 0.3s;
+        gap: 2rem;
+        flex-wrap: wrap;
+    }
+
+    .exam-item:hover {
+        background: rgba(255, 255, 255, 0.08);
+        border-left: 4px solid #4a9eff;
+    }
+
+    .exam-info {
+        flex: 1;
+        min-width: 300px;
+    }
+
+    .exam-info h3 {
+        color: #e0e0e0;
+        font-size: 1.4rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .exam-info p {
+        color: #b0b0b0;
+        margin-bottom: 0.75rem;
+        line-height: 1.5;
+    }
+
+    .exam-meta {
+        color: #888;
+        font-size: 0.9rem;
+        display: flex;
+        gap: 1.5rem;
+        margin-top: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    .exam-actions {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .no-exams {
+        text-align: center;
+        padding: 4rem;
+        color: #888;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 15px;
+    }
+
+    @media (max-width: 768px) {
+        .exam-item {
+            flex-direction: column;
+        }
+
+        .exam-actions {
+            width: 100%;
+        }
+
+        .exam-actions .btn {
+            flex: 1;
+            text-align: center;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <h1 class="dashboard-title">Welcome, Prof. {{ user.first_name }}!</h1>
+    <p class="dashboard-subtitle">Manage your exams and student progress</p>
+</div>
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-value">{{ exams.count }}</div>
+        <div class="stat-label">Total Exams</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value">{{ total_students }}</div>
+        <div class="stat-label">Total Students</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value">{{ total_attempts }}</div>
+        <div class="stat-label">Total Attempts</div>
+    </div>
+</div>
+
+<div class="section-header">
+    <h2 class="section-title">Your Exams</h2>
+    <a href="{% url 'create_exam' %}" class="btn btn-success">+ Create New Exam</a>
+</div>
+
+{% if exams %}
+<div class="exam-list">
+    {% for exam in exams %}
+    <div class="exam-item">
+        <div class="exam-info">
+            <h3>{{ exam.title }}</h3>
+            <p>{{ exam.description|truncatewords:15 }}</p>
+            <div class="exam-meta">
+                <span>📝 {{ exam.questions.count }} Questions</span>
+                <span>⏱️ {{ exam.duration }} minutes</span>
+                <span>📊 {{ exam.total_marks }} marks</span>
+                <span>👥 {{ exam.attempts.count }} attempts</span>
+            </div>
+        </div>
+        <div class="exam-actions">
+            <a href="{% url 'view_exam' exam.id %}" class="btn btn-primary">View Details</a>
+            <a href="{% url 'add_question' exam.id %}" class="btn btn-success">Add Questions</a>
+            <a href="{% url 'delete_exam' exam.id %}" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this exam? All related data will be lost!');">Delete</a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="no-exams">
+    <p style="font-size: 1.2rem; margin-bottom: 1rem;">📝 You haven't created any exams yet.</p>
+    <p style="margin-bottom: 2rem;">Create your first exam to get started!</p>
+    <a href="{% url 'create_exam' %}" class="btn btn-success">Create Your First Exam</a>
+</div>
+{% endif %}
+{% endblock %}

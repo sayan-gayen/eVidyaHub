@@ -1,0 +1,246 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ exam.title }} - eVidyaHub{% endblock %}
+
+{% block extra_css %}
+<style>
+    .exam-header {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 15px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+
+    .exam-title {
+        font-size: 2rem;
+        color: #4a9eff;
+        margin-bottom: 1rem;
+    }
+
+    .exam-info {
+        display: flex;
+        justify-content: center;
+        gap: 3rem;
+        color: #b0b0b0;
+        flex-wrap: wrap;
+    }
+
+    .timer {
+        position: fixed;
+        top: 100px;
+        right: 2rem;
+        background: rgba(255, 71, 87, 0.2);
+        border: 2px solid #ff4757;
+        border-radius: 15px;
+        padding: 1.5rem;
+        text-align: center;
+        min-width: 150px;
+        z-index: 1000;
+    }
+
+    .timer-label {
+        color: #888;
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .timer-value {
+        font-size: 2rem;
+        color: #ff4757;
+        font-weight: bold;
+    }
+
+    .question-card {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 15px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        border: 2px solid transparent;
+        transition: all 0.3s;
+    }
+
+    .question-card:hover {
+        border-color: #4a9eff;
+    }
+
+    .question-number {
+        color: #4a9eff;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        font-size: 1.1rem;
+    }
+
+    .question-text {
+        color: #e0e0e0;
+        font-size: 1.2rem;
+        margin-bottom: 1.5rem;
+        line-height: 1.6;
+    }
+
+    .options {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .option {
+        display: flex;
+        align-items: center;
+        background: rgba(255, 255, 255, 0.03);
+        padding: 1rem 1.5rem;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.3s;
+        border: 2px solid transparent;
+    }
+
+    .option:hover {
+        background: rgba(74, 158, 255, 0.1);
+        border-color: #4a9eff;
+    }
+
+    .option input[type="radio"] {
+        margin-right: 1rem;
+        width: 20px;
+        height: 20px;
+        cursor: pointer;
+        accent-color: #4a9eff;
+    }
+
+    .option label {
+        cursor: pointer;
+        color: #e0e0e0;
+        flex: 1;
+        font-size: 1.05rem;
+    }
+
+    .submit-section {
+        text-align: center;
+        margin-top: 3rem;
+        padding: 2rem;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 15px;
+    }
+
+    .submit-btn {
+        background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+        padding: 1rem 3rem;
+        font-size: 1.2rem;
+        border-radius: 10px;
+        border: none;
+        color: white;
+        cursor: pointer;
+        transition: all 0.3s;
+        font-weight: 600;
+    }
+
+    .submit-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(46, 204, 113, 0.4);
+    }
+
+    @media (max-width: 768px) {
+        .timer {
+            position: static;
+            margin-bottom: 2rem;
+        }
+
+        .exam-info {
+            gap: 1rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="exam-header">
+    <h1 class="exam-title">{{ exam.title }}</h1>
+    <div class="exam-info">
+        <span>⏱️ Duration: {{ exam.duration }} minutes</span>
+        <span>📊 Total Marks: {{ exam.total_marks }}</span>
+        <span>❓ Questions: {{ questions.count }}</span>
+    </div>
+</div>
+
+<div class="timer" id="timer">
+    <div class="timer-label">Time Remaining</div>
+    <div class="timer-value" id="timer-value">{{ exam.duration }}:00</div>
+</div>
+
+<form method="POST" action="{% url 'submit_exam' attempt.id %}" id="exam-form">
+    {% csrf_token %}
+    
+    {% for question in questions %}
+    <div class="question-card">
+        <div class="question-number">Question {{ forloop.counter }} ({{ question.marks }} mark{{ question.marks|pluralize }})</div>
+        <div class="question-text">{{ question.question_text }}</div>
+        
+        <div class="options">
+            <div class="option">
+                <input type="radio" name="question_{{ question.id }}" value="A" id="q{{ question.id }}_a" required>
+                <label for="q{{ question.id }}_a">A) {{ question.option_a }}</label>
+            </div>
+            <div class="option">
+                <input type="radio" name="question_{{ question.id }}" value="B" id="q{{ question.id }}_b">
+                <label for="q{{ question.id }}_b">B) {{ question.option_b }}</label>
+            </div>
+            {% if question.option_c %}
+            <div class="option">
+                <input type="radio" name="question_{{ question.id }}" value="C" id="q{{ question.id }}_c">
+                <label for="q{{ question.id }}_c">C) {{ question.option_c }}</label>
+            </div>
+            {% endif %}
+            {% if question.option_d %}
+            <div class="option">
+                <input type="radio" name="question_{{ question.id }}" value="D" id="q{{ question.id }}_d">
+                <label for="q{{ question.id }}_d">D) {{ question.option_d }}</label>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+
+    <div class="submit-section">
+        <p style="color: #888; margin-bottom: 1rem;">Make sure you have answered all questions before submitting</p>
+        <button type="submit" class="submit-btn" onclick="return confirm('Are you sure you want to submit the exam? You cannot change your answers after submission.');">Submit Exam</button>
+    </div>
+</form>
+
+<script>
+    // Timer functionality
+    let duration = {{ exam.duration }} * 60; // Convert to seconds
+    const timerElement = document.getElementById('timer-value');
+    const form = document.getElementById('exam-form');
+
+    function updateTimer() {
+        const minutes = Math.floor(duration / 60);
+        const seconds = duration % 60;
+        timerElement.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        
+        // Change color when time is running out
+        if (duration <= 60) {
+            timerElement.style.color = '#ff4757';
+        } else if (duration <= 300) {
+            timerElement.style.color = '#ffa500';
+        }
+        
+        if (duration <= 0) {
+            alert('Time is up! Submitting your exam...');
+            form.submit();
+        } else {
+            duration--;
+            setTimeout(updateTimer, 1000);
+        }
+    }
+
+    // Start timer
+    updateTimer();
+
+    // Prevent accidental page close
+    window.addEventListener('beforeunload', function (e) {
+        e.preventDefault();
+        e.returnValue = '';
+    });
+</script>
+{% endblock %}

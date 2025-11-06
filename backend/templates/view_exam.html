@@ -1,0 +1,287 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ exam.title }} - eVidyaHub{% endblock %}
+
+{% block extra_css %}
+<style>
+    .exam-header {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 15px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        border: 1px solid rgba(74, 158, 255, 0.1);
+    }
+
+    .exam-title {
+        font-size: 2.5rem;
+        color: #4a9eff;
+        margin-bottom: 1rem;
+    }
+
+    .exam-description {
+        color: #b0b0b0;
+        margin-bottom: 1.5rem;
+        line-height: 1.6;
+    }
+
+    .exam-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .stat-item {
+        text-align: center;
+        padding: 1rem;
+        background: rgba(74, 158, 255, 0.1);
+        border-radius: 10px;
+    }
+
+    .stat-value {
+        font-size: 2rem;
+        color: #4a9eff;
+        font-weight: bold;
+    }
+
+    .stat-label {
+        color: #888;
+        font-size: 0.9rem;
+        margin-top: 0.5rem;
+    }
+
+    .section {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 15px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .section-title {
+        font-size: 1.8rem;
+        color: #4a9eff;
+    }
+
+    .question-item {
+        background: rgba(255, 255, 255, 0.03);
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        border-left: 3px solid #4a9eff;
+    }
+
+    .question-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+    .question-number {
+        color: #4a9eff;
+        font-weight: 600;
+        font-size: 1.1rem;
+    }
+
+    .question-marks {
+        background: rgba(46, 204, 113, 0.2);
+        color: #2ecc71;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        font-size: 0.9rem;
+    }
+
+    .question-text {
+        color: #e0e0e0;
+        font-size: 1.1rem;
+        margin-bottom: 1rem;
+    }
+
+    .options-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 0.75rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .option-item {
+        background: rgba(255, 255, 255, 0.05);
+        padding: 0.75rem;
+        border-radius: 8px;
+        color: #b0b0b0;
+    }
+
+    .correct-option {
+        background: rgba(46, 204, 113, 0.2);
+        color: #2ecc71;
+        font-weight: 600;
+    }
+
+    .attempt-item {
+        background: rgba(255, 255, 255, 0.03);
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .attempt-info {
+        flex: 1;
+    }
+
+    .student-name {
+        color: #e0e0e0;
+        font-size: 1.2rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .attempt-details {
+        color: #888;
+        font-size: 0.9rem;
+    }
+
+    .attempt-score {
+        text-align: center;
+        padding: 1rem;
+        background: rgba(74, 158, 255, 0.1);
+        border-radius: 10px;
+        min-width: 100px;
+    }
+
+    .score-value {
+        font-size: 1.5rem;
+        color: #4a9eff;
+        font-weight: bold;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        color: #888;
+    }
+
+    @media (max-width: 768px) {
+        .attempt-item {
+            flex-direction: column;
+            text-align: center;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="exam-header">
+    <h1 class="exam-title">{{ exam.title }}</h1>
+    <p class="exam-description">{{ exam.description }}</p>
+    
+    <div class="exam-stats">
+        <div class="stat-item">
+            <div class="stat-value">{{ questions.count }}</div>
+            <div class="stat-label">Questions</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-value">{{ exam.duration }}</div>
+            <div class="stat-label">Minutes</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-value">{{ exam.total_marks }}</div>
+            <div class="stat-label">Total Marks</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-value">{{ attempts.count }}</div>
+            <div class="stat-label">Attempts</div>
+        </div>
+    </div>
+</div>
+
+<div class="section">
+    <div class="section-header">
+        <h2 class="section-title">Questions ({{ questions.count }})</h2>
+        <a href="{% url 'add_question' exam.id %}" class="btn btn-success">+ Add More Questions</a>
+    </div>
+
+    {% if questions %}
+        {% for question in questions %}
+        <div class="question-item">
+            <div class="question-header">
+                <span class="question-number">Question {{ forloop.counter }}</span>
+                <span class="question-marks">{{ question.marks }} mark{{ question.marks|pluralize }}</span>
+            </div>
+            
+            <div class="question-text">{{ question.question_text }}</div>
+            
+            <div class="options-grid">
+                <div class="option-item {% if question.correct_answer == 'A' %}correct-option{% endif %}">
+                    A) {{ question.option_a }}
+                </div>
+                <div class="option-item {% if question.correct_answer == 'B' %}correct-option{% endif %}">
+                    B) {{ question.option_b }}
+                </div>
+                {% if question.option_c %}
+                <div class="option-item {% if question.correct_answer == 'C' %}correct-option{% endif %}">
+                    C) {{ question.option_c }}
+                </div>
+                {% endif %}
+                {% if question.option_d %}
+                <div class="option-item {% if question.correct_answer == 'D' %}correct-option{% endif %}">
+                    D) {{ question.option_d }}
+                </div>
+                {% endif %}
+            </div>
+            
+            <div style="color: #2ecc71; font-size: 0.9rem;">✓ Correct Answer: {{ question.correct_answer }}</div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="empty-state">
+            <p style="font-size: 1.2rem; margin-bottom: 1rem;">📝 No questions added yet</p>
+            <a href="{% url 'add_question' exam.id %}" class="btn btn-primary">Add Questions</a>
+        </div>
+    {% endif %}
+</div>
+
+<div class="section">
+    <div class="section-header">
+        <h2 class="section-title">Student Attempts ({{ attempts.count }})</h2>
+    </div>
+
+    {% if attempts %}
+        {% for attempt in attempts %}
+        <div class="attempt-item">
+            <div class="attempt-info">
+                <div class="student-name">👤 {{ attempt.student.get_full_name }}</div>
+                <div class="attempt-details">
+                    Username: {{ attempt.student.username }} | 
+                    Completed: {{ attempt.completed_at|date:"M d, Y - g:i A" }}
+                </div>
+            </div>
+            <div class="attempt-score">
+                <div class="score-value">{{ attempt.score }}/{{ exam.total_marks }}</div>
+                <div style="color: #888; font-size: 0.85rem; margin-top: 0.25rem;">{{ attempt.get_percentage }}%</div>
+            </div>
+            <a href="{% url 'grade_attempt' attempt.id %}" class="btn btn-primary">View Details</a>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="empty-state">
+            <p>📊 No student attempts yet</p>
+        </div>
+    {% endif %}
+</div>
+
+<div style="text-align: center; margin-top: 2rem;">
+    <a href="{% url 'teacher_dashboard' %}" class="btn btn-primary">Back to Dashboard</a>
+</div>
+{% endblock %}
